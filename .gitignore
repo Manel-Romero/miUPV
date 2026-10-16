@@ -1,0 +1,58 @@
+# Generated binaries & build artifacts
+/target/
+**/*.rs.bk
+
+# Sensitive user secrets & active session tokens
+secrets.env
+*.env
+*.env.*
+captured_tokens.json
+oauth_request.json
+oauth_response.json
+tokens.json
+credentials.json
+
+# APK binaries, certificates & decompiled dumps
+*.apk
+*.idsig
+*.keystore
+/extracted/
+/runners/
+base.apk
+miupv_patched.apk
+release.RE.apk
+TunProxy.apk
+capture_token.py
+
+# Android subproject (held for separate release)
+/miupv-android/
+
+# Internal reverse engineering & analysis docs
+ESTADO_DEL_PROYECTO.md
+GUIA_DESARROLLO_CLI.md
+INVESTIGACION_Y_RE.md
+REPORTE_TECNICO.md
+RESUMEN_EJECUTIVO.md
+TOOLS.md
+TUTORIAL_EXTRACCION_TOKEN.md
+
+# Python & Virtualenv
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+
+# Calendar & test exports
+*.ics
+/horario.ics
+/horario_*.ics
+/test_*.ics
+*.log
+
+# OS & Editor files
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*~
