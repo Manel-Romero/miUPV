@@ -71,14 +71,21 @@ pub async fn login_intranet_with_client(
     let www_base = client.config().www_base_url.trim_end_matches('/');
 
     let cas_service_url = format!("{www_base}/pls/soalu/sic_intracas.app_intranet?P_CUA=miupv");
-    let encoded_service: String = url::form_urlencoded::byte_serialize(cas_service_url.as_bytes()).collect();
+    let encoded_service: String =
+        url::form_urlencoded::byte_serialize(cas_service_url.as_bytes()).collect();
     let login_page_url = format!("{cas_base}/cas/login?service={encoded_service}");
 
     // 1. Fetch CAS login form to obtain the execution flow token
     let get_res = http
         .get(&login_page_url)
-        .header("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36")
-        .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+        .header(
+            "User-Agent",
+            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
+        )
+        .header(
+            "Accept",
+            "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        )
         .send()
         .await?;
 
@@ -92,8 +99,11 @@ pub async fn login_intranet_with_client(
     }
 
     let html = get_res.text().await?;
-    let execution = extract_cas_execution(&html)
-        .ok_or_else(|| CoreError::Auth("No se pudo obtener el token de ejecución del formulario CAS de la UPV".into()))?;
+    let execution = extract_cas_execution(&html).ok_or_else(|| {
+        CoreError::Auth(
+            "No se pudo obtener el token de ejecución del formulario CAS de la UPV".into(),
+        )
+    })?;
 
     // 2. Submit credentials to CAS
     let post_url = format!("{cas_base}/cas/login");
@@ -107,8 +117,14 @@ pub async fn login_intranet_with_client(
 
     let mut post_req = http
         .post(&post_url)
-        .header("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36")
-        .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+        .header(
+            "User-Agent",
+            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
+        )
+        .header(
+            "Accept",
+            "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        )
         .form(&form_params);
 
     if !cas_cookies.is_empty() {
@@ -147,7 +163,9 @@ pub async fn login_intranet_with_client(
         .get(reqwest::header::LOCATION)
         .and_then(|h| h.to_str().ok())
         .map(|s| s.to_string())
-        .ok_or_else(|| CoreError::Auth("El portal CAS no devolvió cabecera de redirección Location".into()))?;
+        .ok_or_else(|| {
+            CoreError::Auth("El portal CAS no devolvió cabecera de redirección Location".into())
+        })?;
 
     for cookie in post_res.headers().get_all(reqwest::header::SET_COOKIE) {
         if let Ok(c_str) = cookie.to_str() {
@@ -165,8 +183,14 @@ pub async fn login_intranet_with_client(
         hops += 1;
         let mut hop_req = http
             .get(&next_location)
-            .header("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36")
-            .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+            .header(
+                "User-Agent",
+                "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
+            )
+            .header(
+                "Accept",
+                "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            );
 
         if !cas_cookies.is_empty() {
             hop_req = hop_req.header(reqwest::header::COOKIE, cas_cookies.join("; "));
@@ -205,7 +229,8 @@ pub async fn login_intranet_with_client(
 
     let tdp = tdp_found.ok_or_else(|| {
         CoreError::Auth(
-            "No se pudo extraer la cookie de sesión TDp tras iniciar sesión en la Intranet UPV".into(),
+            "No se pudo extraer la cookie de sesión TDp tras iniciar sesión en la Intranet UPV"
+                .into(),
         )
     })?;
 
@@ -240,7 +265,10 @@ pub async fn login_pkce_with_client(
     let code_verifier = generate_code_verifier();
     let code_challenge = generate_code_challenge(&code_verifier);
 
-    let token_url = format!("{}/oauth/tokens/", client.config().auth_base_url.trim_end_matches('/'));
+    let token_url = format!(
+        "{}/oauth/tokens/",
+        client.config().auth_base_url.trim_end_matches('/')
+    );
 
     let is_mock_test = client.config().client_id == crate::client::DEFAULT_CLIENT_ID
         && !client.config().auth_base_url.contains("siupv.upv.es");
@@ -260,7 +288,10 @@ pub async fn login_pkce_with_client(
         ("code_challenge", code_challenge.as_str()),
         ("code_challenge_method", "S256"),
         ("UPV_UUID", "UKQ1.240624.001"),
-        ("client_id", if is_mock_test { "miUpv" } else { CLIENT_1_ID }),
+        (
+            "client_id",
+            if is_mock_test { "miUpv" } else { CLIENT_1_ID },
+        ),
     ];
 
     let res1 = client
@@ -277,7 +308,8 @@ pub async fn login_pkce_with_client(
     let body_text1 = res1.text().await?;
 
     if !status1.is_success() {
-        if status1 == reqwest::StatusCode::UNAUTHORIZED || status1 == reqwest::StatusCode::FORBIDDEN {
+        if status1 == reqwest::StatusCode::UNAUTHORIZED || status1 == reqwest::StatusCode::FORBIDDEN
+        {
             return Err(CoreError::Auth(format!(
                 "Credenciales de acceso incorrectas o no autorizadas (HTTP {status1}). Verifica tu DNI y contraseña."
             )));
@@ -308,7 +340,9 @@ pub async fn login_pkce_with_client(
     // Compatibility check: if response already has refreshToken (e.g. mock test server)
     if let Some(ref_tok) = parsed_stage1.refresh_token {
         if !ref_tok.is_empty() {
-            let expires_at = parsed_stage1.expires_in.map(|ttl| Utc::now() + Duration::seconds(ttl));
+            let expires_at = parsed_stage1
+                .expires_in
+                .map(|ttl| Utc::now() + Duration::seconds(ttl));
             return Ok(AuthTokens {
                 access_token: parsed_stage1.access_token,
                 refresh_token: ref_tok,
@@ -393,7 +427,9 @@ pub fn set_manual_token(
         .unwrap_or(access_token.trim());
 
     if clean_acc.is_empty() {
-        return Err(CoreError::Auth("El token de acceso no puede estar vacío".into()));
+        return Err(CoreError::Auth(
+            "El token de acceso no puede estar vacío".into(),
+        ));
     }
 
     let refresh = refresh_token.unwrap_or("").trim().to_string();
@@ -405,12 +441,7 @@ pub fn set_manual_token(
         }
     });
 
-    let tokens = AuthTokens::new(
-        clean_acc.to_string(),
-        refresh,
-        Some(ttl),
-        None,
-    );
+    let tokens = AuthTokens::new(clean_acc.to_string(), refresh, Some(ttl), None);
 
     save_tokens(&tokens)?;
     Ok(tokens)
@@ -419,7 +450,10 @@ pub fn set_manual_token(
 /// Helper: Extracts the hidden `execution` field from the CAS HTML form.
 pub fn extract_cas_execution(html: &str) -> Option<String> {
     let form_slice = if let Some(idx) = html.find("id=\"fm1\"") {
-        let end = html[idx..].find("</form>").map(|e| idx + e).unwrap_or(html.len());
+        let end = html[idx..]
+            .find("</form>")
+            .map(|e| idx + e)
+            .unwrap_or(html.len());
         &html[idx..end]
     } else {
         html
@@ -479,7 +513,10 @@ pub async fn refresh_with_client(
     client: &MiupvClient,
     refresh_token: &str,
 ) -> Result<AuthTokens, CoreError> {
-    let token_url = format!("{}/oauth/tokens/", client.config().auth_base_url.trim_end_matches('/'));
+    let token_url = format!(
+        "{}/oauth/tokens/",
+        client.config().auth_base_url.trim_end_matches('/')
+    );
 
     let params = [
         ("grant_type", "refresh_token"),
@@ -534,7 +571,10 @@ pub async fn logout(access_token: &str) -> Result<(), CoreError> {
 
 /// Revokes the current session at the OAuth server using a custom client.
 pub async fn logout_with_client(client: &MiupvClient, access_token: &str) -> Result<(), CoreError> {
-    let logout_url = format!("{}/oauth/logout/", client.config().auth_base_url.trim_end_matches('/'));
+    let logout_url = format!(
+        "{}/oauth/logout/",
+        client.config().auth_base_url.trim_end_matches('/')
+    );
     let res = client
         .authed_request(reqwest::Method::POST, &logout_url, access_token)
         .send()
@@ -571,7 +611,8 @@ pub fn load_tokens() -> Result<Option<AuthTokens>, CoreError> {
     let exp_entry = Entry::new(KEYRING_ALT_SERVICE, KEYRING_EXPIRY_KEY);
 
     if let (Ok(acc), Ok(ref_tok)) = (acc_entry, ref_entry) {
-        if let (Ok(access_token), Ok(refresh_token)) = (acc.get_password(), ref_tok.get_password()) {
+        if let (Ok(access_token), Ok(refresh_token)) = (acc.get_password(), ref_tok.get_password())
+        {
             let expires_at = exp_entry
                 .ok()
                 .and_then(|e| e.get_password().ok())
@@ -665,9 +706,12 @@ fn fallback_token_file() -> Option<PathBuf> {
     if let Ok(custom) = std::env::var("MIUPV_TOKEN_FILE") {
         return Some(PathBuf::from(custom));
     }
-    std::env::var("HOME")
-        .ok()
-        .map(|home| PathBuf::from(home).join(".config").join("miupv").join("tokens.json"))
+    std::env::var("HOME").ok().map(|home| {
+        PathBuf::from(home)
+            .join(".config")
+            .join("miupv")
+            .join("tokens.json")
+    })
 }
 
 /// Stored credentials for automatic monthly session renewal.
@@ -683,7 +727,10 @@ pub fn get_credentials_path() -> PathBuf {
         return PathBuf::from(custom);
     }
     if let Ok(home) = std::env::var("HOME") {
-        return PathBuf::from(home).join(".config").join("miupv").join("credentials.json");
+        return PathBuf::from(home)
+            .join(".config")
+            .join("miupv")
+            .join("credentials.json");
     }
     PathBuf::from("/tmp/miupv_credentials.json")
 }
@@ -873,8 +920,12 @@ mod tests {
     fn test_manual_token_cleaning() {
         std::env::set_var("MIUPV_TOKEN_FILE", "/tmp/miupv_test_unit.json");
         let raw_token = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.dummy";
-        let tokens = set_manual_token(raw_token, None, Some(3600)).expect("Should accept Bearer token");
-        assert_eq!(tokens.access_token, "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.dummy");
+        let tokens =
+            set_manual_token(raw_token, None, Some(3600)).expect("Should accept Bearer token");
+        assert_eq!(
+            tokens.access_token,
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.dummy"
+        );
         assert_eq!(tokens.ttl_access_token, Some(3600));
         assert!(tokens.is_valid());
     }

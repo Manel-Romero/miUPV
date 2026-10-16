@@ -47,7 +47,12 @@ pub struct ProfesorTutoria {
     pub id: String,
 
     /// Full name of the professor.
-    #[serde(alias = "nombre", alias = "NOMBRE", alias = "nomTutor", alias = "NOMTUTOR")]
+    #[serde(
+        alias = "nombre",
+        alias = "NOMBRE",
+        alias = "nomTutor",
+        alias = "NOMTUTOR"
+    )]
     pub nombre: String,
 }
 

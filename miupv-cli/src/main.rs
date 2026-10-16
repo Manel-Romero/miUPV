@@ -6,8 +6,8 @@ mod ui;
 
 use clap::{CommandFactory, Parser, Subcommand};
 use commands::{
-    auth, avisos, cabinas, calendario, carnet, completions, deportes, login, logout, notas,
-    perfil, tareas, tutorias, wol,
+    auth, avisos, cabinas, calendario, carnet, completions, deportes, login, logout, notas, perfil,
+    tareas, tutorias, wol,
 };
 
 #[derive(Parser, Debug)]

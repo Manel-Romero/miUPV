@@ -47,13 +47,22 @@ pub async fn run(
             }
 
             if equipos.is_empty() {
-                println!("{}", ui::info("No tienes equipos asociados para encendido remoto."));
+                println!(
+                    "{}",
+                    ui::info("No tienes equipos asociados para encendido remoto.")
+                );
                 return Ok(());
             }
 
-            println!("{}", console::style("Equipos disponibles para Wake-on-LAN:").bold().underlined());
+            println!(
+                "{}",
+                console::style("Equipos disponibles para Wake-on-LAN:")
+                    .bold()
+                    .underlined()
+            );
 
-            let mut table = ui::create_table(&["ID", "Nombre / Host", "Estado", "IP", "MAC", "Campus"]);
+            let mut table =
+                ui::create_table(&["ID", "Nombre / Host", "Estado", "IP", "MAC", "Campus"]);
 
             for eq in &equipos {
                 let estado_cell = match eq.estado.as_deref() {
@@ -83,15 +92,29 @@ pub async fn run(
                     spinner.finish_and_clear();
                     if result.success {
                         let msg = result.mensaje.as_deref().unwrap_or("Petición aceptada");
-                        println!("{}", ui::success(&format!("Comando Wake-on-LAN enviado a '{equipo}': {msg}")));
+                        println!(
+                            "{}",
+                            ui::success(&format!(
+                                "Comando Wake-on-LAN enviado a '{equipo}': {msg}"
+                            ))
+                        );
                     } else {
-                        let msg = result.mensaje.as_deref().unwrap_or("No se pudo encender el equipo");
-                        eprintln!("{}", ui::error(&format!("Fallo al encender '{equipo}': {msg}")));
+                        let msg = result
+                            .mensaje
+                            .as_deref()
+                            .unwrap_or("No se pudo encender el equipo");
+                        eprintln!(
+                            "{}",
+                            ui::error(&format!("Fallo al encender '{equipo}': {msg}"))
+                        );
                     }
                 }
                 Err(err) => {
                     spinner.finish_and_clear();
-                    eprintln!("{}", ui::error(&format!("Error al enviar Wake-on-LAN: {err}")));
+                    eprintln!(
+                        "{}",
+                        ui::error(&format!("Error al enviar Wake-on-LAN: {err}"))
+                    );
                 }
             }
         }

@@ -69,13 +69,24 @@ Todo el proceso de ingeniería inversa de la app oficial de Android de la UPV, e
 
 ## 📦 Instalación
 
-### 1. Clonar el repositorio
+### Opción A: Binarios precompilados (GitHub Releases)
+Puedes descargar directamente los ejecutables listos para usar desde la sección de **[Releases](https://github.com/Manel-Romero/miUPV/releases)**:
+- **Linux x86_64** (`x86_64-unknown-linux-gnu`)
+- **macOS Apple Silicon** (M1/M2/M3/M4, `aarch64-apple-darwin`)
+- **macOS Intel** (`x86_64-apple-darwin`)
+- **Windows x64** (`x86_64-pc-windows-msvc`)
+
+Descomprime el archivo y añade el ejecutable `miupv` a tu `PATH`.
+
+### Opción B: Compilación desde código fuente
+
+1. Clonar el repositorio:
 ```bash
 git clone https://github.com/Manel-Romero/miUPV.git
 cd miUPV
 ```
 
-### 2. Compilar e instalar el binario CLI
+2. Compilar e instalar el binario CLI:
 ```bash
 cargo install --path miupv-cli
 ```

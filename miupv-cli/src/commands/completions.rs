@@ -42,7 +42,9 @@ pub fn run(
     }
 
     // Auto-install mode
-    let home = env::var("HOME").map(PathBuf::from).map_err(|_| "HOME environment variable not set")?;
+    let home = env::var("HOME")
+        .map(PathBuf::from)
+        .map_err(|_| "HOME environment variable not set")?;
     let mut script_bytes = Vec::new();
     generate(target_shell, &mut cmd, "miupv", &mut script_bytes);
 
@@ -63,8 +65,13 @@ pub fn run(
             install_elvish(&home, &script_bytes)?;
         }
         _ => {
-            println!("{}", ui::warning("Instalación automática no soportada para este tipo de shell."));
-            println!("Puedes redirigir la salida manualmente: `miupv completions <shell> > archivo`");
+            println!(
+                "{}",
+                ui::warning("Instalación automática no soportada para este tipo de shell.")
+            );
+            println!(
+                "Puedes redirigir la salida manualmente: `miupv completions <shell> > archivo`"
+            );
         }
     }
 
@@ -77,7 +84,7 @@ fn install_zsh(home: &Path, bytes: &[u8]) -> Result<(), Box<dyn std::error::Erro
     // 1. Oh-My-Zsh directory (if oh-my-zsh exists or is configured in fpath)
     let omz_completions = home.join(".oh-my-zsh/completions");
     let omz_custom_completions = home.join(".oh-my-zsh/custom/completions");
-    
+
     if home.join(".oh-my-zsh").is_dir() {
         let target_dir = if omz_custom_completions.exists() {
             omz_custom_completions
@@ -108,15 +115,27 @@ fn install_zsh(home: &Path, bytes: &[u8]) -> Result<(), Box<dyn std::error::Erro
         }
     }
 
-    println!("{}", ui::success("Autocompletado para Zsh instalado con éxito en:"));
+    println!(
+        "{}",
+        ui::success("Autocompletado para Zsh instalado con éxito en:")
+    );
     for p in installed_paths {
         println!("   {}", console::style(p.display()).cyan());
     }
 
-    println!("\n{}", console::style("Para activarlo en tu sesión actual de terminal, ejecuta:").bold());
+    println!(
+        "\n{}",
+        console::style("Para activarlo en tu sesión actual de terminal, ejecuta:").bold()
+    );
     println!("   {}", console::style("source ~/.zshrc").green().bold());
-    println!("   {} (o simplemente abre una nueva pestaña de terminal)\n", console::style("o").dim());
-    println!("{}", ui::info("Prueba pulsando Tab: `miupv <Tab>` o `miupv deportes <Tab>`"));
+    println!(
+        "   {} (o simplemente abre una nueva pestaña de terminal)\n",
+        console::style("o").dim()
+    );
+    println!(
+        "{}",
+        ui::info("Prueba pulsando Tab: `miupv <Tab>` o `miupv deportes <Tab>`")
+    );
 
     Ok(())
 }
@@ -127,9 +146,15 @@ fn install_bash(home: &Path, bytes: &[u8]) -> Result<(), Box<dyn std::error::Err
     let file_path = target_dir.join("miupv");
     fs::write(&file_path, bytes)?;
 
-    println!("{}", ui::success("Autocompletado para Bash instalado con éxito en:"));
+    println!(
+        "{}",
+        ui::success("Autocompletado para Bash instalado con éxito en:")
+    );
     println!("   {}", console::style(file_path.display()).cyan());
-    println!("\n{}", console::style("Para activarlo en tu terminal, ejecuta:").bold());
+    println!(
+        "\n{}",
+        console::style("Para activarlo en tu terminal, ejecuta:").bold()
+    );
     println!("   source ~/.local/share/bash-completion/completions/miupv\n");
 
     Ok(())
@@ -141,7 +166,10 @@ fn install_fish(home: &Path, bytes: &[u8]) -> Result<(), Box<dyn std::error::Err
     let file_path = target_dir.join("miupv.fish");
     fs::write(&file_path, bytes)?;
 
-    println!("{}", ui::success("Autocompletado para Fish instalado con éxito en:"));
+    println!(
+        "{}",
+        ui::success("Autocompletado para Fish instalado con éxito en:")
+    );
     println!("   {}", console::style(file_path.display()).cyan());
     println!("Fish cargará el autocompletado automáticamente.\n");
 
@@ -154,7 +182,10 @@ fn install_powershell(home: &Path, bytes: &[u8]) -> Result<(), Box<dyn std::erro
     let file_path = target_dir.join("miupv.ps1");
     fs::write(&file_path, bytes)?;
 
-    println!("{}", ui::success("Script de autocompletado para PowerShell guardado en:"));
+    println!(
+        "{}",
+        ui::success("Script de autocompletado para PowerShell guardado en:")
+    );
     println!("   {}", console::style(file_path.display()).cyan());
     println!("Añade `.` seguido de la ruta en tu `$PROFILE`.\n");
 
@@ -167,7 +198,10 @@ fn install_elvish(home: &Path, bytes: &[u8]) -> Result<(), Box<dyn std::error::E
     let file_path = target_dir.join("miupv.elv");
     fs::write(&file_path, bytes)?;
 
-    println!("{}", ui::success("Script de autocompletado para Elvish guardado en:"));
+    println!(
+        "{}",
+        ui::success("Script de autocompletado para Elvish guardado en:")
+    );
     println!("   {}", console::style(file_path.display()).cyan());
 
     Ok(())

@@ -26,11 +26,23 @@ pub struct PersonData {
     pub dni: String,
 
     /// URL to the official photograph.
-    #[serde(alias = "FOTO_URL", alias = "foto_url", alias = "fotoUrl", alias = "urlFoto", default)]
+    #[serde(
+        alias = "FOTO_URL",
+        alias = "foto_url",
+        alias = "fotoUrl",
+        alias = "urlFoto",
+        default
+    )]
     pub foto_url: Option<String>,
 
     /// User collective type: e.g. "alumno", "docente", "pdi", "pas".
-    #[serde(alias = "TIPO", alias = "tipo", alias = "tipo_usuario", alias = "tipoEmp", default)]
+    #[serde(
+        alias = "TIPO",
+        alias = "tipo",
+        alias = "tipo_usuario",
+        alias = "tipoEmp",
+        default
+    )]
     pub tipo: String,
 
     /// Full name fallback from API (e.g. "name": "APELLIDOS, NOMBRE").

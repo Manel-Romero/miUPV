@@ -12,10 +12,16 @@ pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
 
     if let Err(e) = auth_service::clear_tokens() {
         spinner.finish_and_clear();
-        eprintln!("{}", ui::warning(&format!("Sesión borrada localmente con advertencia: {e}")));
+        eprintln!(
+            "{}",
+            ui::warning(&format!("Sesión borrada localmente con advertencia: {e}"))
+        );
     } else {
         spinner.finish_and_clear();
-        println!("{}", ui::success("Sesión cerrada. Tokens eliminados del almacenamiento seguro."));
+        println!(
+            "{}",
+            ui::success("Sesión cerrada. Tokens eliminados del almacenamiento seguro.")
+        );
     }
 
     Ok(())

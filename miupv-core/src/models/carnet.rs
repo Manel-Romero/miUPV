@@ -18,7 +18,13 @@ pub struct CarnetInfo {
     pub foto_url: Option<String>,
 
     /// Raw QR code payload for barcode scanning.
-    #[serde(alias = "qr_data", alias = "QR_DATA", alias = "qr", alias = "cod_qr", default)]
+    #[serde(
+        alias = "qr_data",
+        alias = "QR_DATA",
+        alias = "qr",
+        alias = "cod_qr",
+        default
+    )]
     pub qr_data: Option<String>,
 
     /// Card type (e.g. "ESTUDIANTE", "PDI", "PAS", "ALUMNI").

@@ -7,11 +7,22 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct CalEvent {
     /// Unique event identifier.
-    #[serde(alias = "id", alias = "ID", alias = "id_evento", alias = "idEvento", alias = "IDEVENTO")]
+    #[serde(
+        alias = "id",
+        alias = "ID",
+        alias = "id_evento",
+        alias = "idEvento",
+        alias = "IDEVENTO"
+    )]
     pub id: String,
 
     /// Event title (e.g. subject name or class topic).
-    #[serde(alias = "titulo", alias = "TITULO", alias = "title", alias = "nom_evento")]
+    #[serde(
+        alias = "titulo",
+        alias = "TITULO",
+        alias = "title",
+        alias = "nom_evento"
+    )]
     pub titulo: String,
 
     /// Detailed description or location notes.
@@ -26,15 +37,34 @@ pub struct CalEvent {
     pub descripcion: Option<String>,
 
     /// Start timestamp (e.g. "2026-09-16T08:30:00.000Z").
-    #[serde(alias = "fecha_ini", alias = "FECHA_INI", alias = "fechaIni", alias = "FECHAINI", alias = "start_date")]
+    #[serde(
+        alias = "fecha_ini",
+        alias = "FECHA_INI",
+        alias = "fechaIni",
+        alias = "FECHAINI",
+        alias = "start_date"
+    )]
     pub fecha_ini: String,
 
     /// End timestamp.
-    #[serde(alias = "fecha_fin", alias = "FECHA_FIN", alias = "fechaFin", alias = "FECHAFIN", alias = "end_date")]
+    #[serde(
+        alias = "fecha_fin",
+        alias = "FECHA_FIN",
+        alias = "fechaFin",
+        alias = "FECHAFIN",
+        alias = "end_date"
+    )]
     pub fecha_fin: String,
 
     /// Event type (e.g. "Clases", "Exámenes", "TEORIA").
-    #[serde(alias = "tipo", alias = "TIPO", alias = "type", alias = "categoria", alias = "CATEGORIA", default)]
+    #[serde(
+        alias = "tipo",
+        alias = "TIPO",
+        alias = "type",
+        alias = "categoria",
+        alias = "CATEGORIA",
+        default
+    )]
     pub tipo: Option<String>,
 
     /// Event location (e.g. "AULA 1E 1.3 (Edificio 1E)").
@@ -42,7 +72,13 @@ pub struct CalEvent {
     pub lugar: Option<String>,
 
     /// Color hex code or label for display.
-    #[serde(alias = "color", alias = "COLOR", alias = "categoriaDeco", alias = "CATEGORIADECO", default)]
+    #[serde(
+        alias = "color",
+        alias = "COLOR",
+        alias = "categoriaDeco",
+        alias = "CATEGORIADECO",
+        default
+    )]
     pub color: Option<String>,
 
     /// True if the event spans the entire day.

@@ -16,7 +16,10 @@ pub async fn run(n: u32, json: bool, lang: &str) -> Result<(), Box<dyn std::erro
         }
         Err(err) => {
             spinner.finish_and_clear();
-            eprintln!("{}", ui::error(&format!("Error al obtener los avisos: {err}")));
+            eprintln!(
+                "{}",
+                ui::error(&format!("Error al obtener los avisos: {err}"))
+            );
             return Ok(());
         }
     };
@@ -33,13 +36,20 @@ pub async fn run(n: u32, json: bool, lang: &str) -> Result<(), Box<dyn std::erro
         return Ok(());
     }
 
-    println!("{}", console::style(format!("Últimos avisos de la UPV (máx. {n}):")).bold().underlined());
+    println!(
+        "{}",
+        console::style(format!("Últimos avisos de la UPV (máx. {n}):"))
+            .bold()
+            .underlined()
+    );
 
     let mut table = ui::create_table(&["ID", "Fecha", "Centro", "Título", "Importante"]);
 
     for a in &display_avisos {
         let imp_cell = if a.importante {
-            Cell::new("★ URGENTE").fg(Color::Red).add_attribute(comfy_table::Attribute::Bold)
+            Cell::new("★ URGENTE")
+                .fg(Color::Red)
+                .add_attribute(comfy_table::Attribute::Bold)
         } else {
             Cell::new("Normal").fg(Color::Grey)
         };

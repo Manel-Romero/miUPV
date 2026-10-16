@@ -79,7 +79,11 @@ async fn test_login_wrong_password() {
     oauth_mock.assert();
     match result {
         Err(CoreError::Auth(msg)) => {
-            assert!(msg.contains("401") || msg.contains("Bad credentials") || msg.contains("unauthorized"));
+            assert!(
+                msg.contains("401")
+                    || msg.contains("Bad credentials")
+                    || msg.contains("unauthorized")
+            );
         }
         res => panic!("Expected Auth error, got: {:?}", res),
     }
@@ -100,8 +104,7 @@ async fn test_intranet_login_success() {
     let mock_tdp = "D11D5A74C4AEA2BB132F9633701955A0";
 
     let cas_get_mock = server.mock(|when, then| {
-        when.method(GET)
-            .path("/cas/login");
+        when.method(GET).path("/cas/login");
         then.status(200)
             .header("content-type", "text/html;charset=UTF-8")
             .header("set-cookie", "TGC=mock_tgc; Path=/cas/; Secure; HttpOnly")
@@ -125,8 +128,13 @@ async fn test_intranet_login_success() {
             .body_contains(&format!("password={test_pass}"))
             .body_contains(&format!("execution={execution_token}"))
             .body_contains("_eventId=submit");
-        then.status(302)
-            .header("Location", format!("{}/pls/soalu/sic_intracas.app_intranet?P_CUA=miupv&ticket={test_ticket}", server.base_url()));
+        then.status(302).header(
+            "Location",
+            format!(
+                "{}/pls/soalu/sic_intracas.app_intranet?P_CUA=miupv&ticket={test_ticket}",
+                server.base_url()
+            ),
+        );
     });
 
     let bridge_mock = server.mock(|when, then| {
@@ -135,8 +143,17 @@ async fn test_intranet_login_success() {
             .query_param("P_CUA", "miupv")
             .query_param("ticket", test_ticket);
         then.status(302)
-            .header("Set-Cookie", format!("TDp={mock_tdp};path=/;domain=.upv.es;secure;HttpOnly"))
-            .header("Location", format!("{}/pls/soalu/sic_menu.MiUPV?P_IDIOMA=c&P_MODO=alumno", server.base_url()));
+            .header(
+                "Set-Cookie",
+                format!("TDp={mock_tdp};path=/;domain=.upv.es;secure;HttpOnly"),
+            )
+            .header(
+                "Location",
+                format!(
+                    "{}/pls/soalu/sic_menu.MiUPV?P_IDIOMA=c&P_MODO=alumno",
+                    server.base_url()
+                ),
+            );
     });
 
     let tokens = auth_service::login_intranet_with_client(&client, test_user, test_pass)
@@ -164,8 +181,7 @@ async fn test_intranet_login_wrong_password() {
     let execution_token = "mock_exec_fail";
 
     let cas_get_mock = server.mock(|when, then| {
-        when.method(GET)
-            .path("/cas/login");
+        when.method(GET).path("/cas/login");
         then.status(200)
             .header("content-type", "text/html;charset=UTF-8")
             .body(format!(
@@ -183,9 +199,9 @@ async fn test_intranet_login_wrong_password() {
             .path("/cas/login")
             .body_contains(&format!("username={test_user}"))
             .body_contains(&format!("password={wrong_pass}"));
-        then.status(401)
-            .header("content-type", "text/html")
-            .body("<html><body><div class='alert-danger'>Credenciales inválidas.</div></body></html>");
+        then.status(401).header("content-type", "text/html").body(
+            "<html><body><div class='alert-danger'>Credenciales inválidas.</div></body></html>",
+        );
     });
 
     let result = auth_service::login_intranet_with_client(&client, test_user, wrong_pass).await;
@@ -336,7 +352,10 @@ async fn test_get_tasks() {
     assert_eq!(tasks.len(), 1);
     assert_eq!(tasks[0].id, "task-uuid-1234");
     assert_eq!(tasks[0].title, "Entrega Laboratorio 3");
-    assert_eq!(tasks[0].site_title.as_deref(), Some("Programación Paralela"));
+    assert_eq!(
+        tasks[0].site_title.as_deref(),
+        Some("Programación Paralela")
+    );
     assert_eq!(tasks[0].status.as_deref(), Some("NOT_SUBMITTED"));
     assert_eq!(tasks[0].attachments.len(), 1);
 }

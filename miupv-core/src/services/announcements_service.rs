@@ -31,14 +31,20 @@ pub async fn get_avisos_with_client(
     let base = client.config().www_base_url.trim_end_matches('/');
     let url = format!("{base}/pls/sorest/sic_app_centros.get_avisos?p_tit={tit}&p_idioma={lang}");
 
-    let res = client.authed_request(Method::GET, &url, token).send().await?;
+    let res = client
+        .authed_request(Method::GET, &url, token)
+        .send()
+        .await?;
     if res.status().is_success() {
         let body = client.handle_response_text(res).await?;
         return parse_json_list(&body);
     }
 
     // Fallback: Query PoliformaT announcements (accessible via Intranet session)
-    if let Ok(poliformat_avisos) = crate::services::poliformat_service::get_announcements_with_client(client, token, 20, 15).await {
+    if let Ok(poliformat_avisos) =
+        crate::services::poliformat_service::get_announcements_with_client(client, token, 20, 15)
+            .await
+    {
         let converted: Vec<Aviso> = poliformat_avisos
             .into_iter()
             .map(|a| Aviso {
@@ -55,5 +61,8 @@ pub async fn get_avisos_with_client(
 
     let status = res.status();
     let body = res.text().await.unwrap_or_default();
-    Err(CoreError::Api { status, message: body })
+    Err(CoreError::Api {
+        status,
+        message: body,
+    })
 }

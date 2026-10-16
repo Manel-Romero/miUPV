@@ -20,7 +20,10 @@ pub async fn get_asignaturas_with_client(
     let base = client.config().www_base_url.trim_end_matches('/');
     let url = format!("{base}/pls/sorest/sic_app_tutorias.alu_tut_asignaturas?p_idioma={lang}");
 
-    let res = client.authed_request(Method::GET, &url, token).send().await?;
+    let res = client
+        .authed_request(Method::GET, &url, token)
+        .send()
+        .await?;
     let body = client.handle_response_text(res).await?;
     parse_json_list(&body)
 }
@@ -38,18 +41,19 @@ pub async fn get_tutorias_with_client(
     lang: &str,
 ) -> Result<Vec<Tutoria>, CoreError> {
     let base = client.config().www_base_url.trim_end_matches('/');
-    let url = format!("{base}/pls/sorest/sic_app_tutorias.alu_get_tutorias?p_idioma={lang}&p_modo=");
+    let url =
+        format!("{base}/pls/sorest/sic_app_tutorias.alu_get_tutorias?p_idioma={lang}&p_modo=");
 
-    let res = client.authed_request(Method::GET, &url, token).send().await?;
+    let res = client
+        .authed_request(Method::GET, &url, token)
+        .send()
+        .await?;
     let body = client.handle_response_text(res).await?;
     parse_json_list(&body)
 }
 
 /// Submits a request for a new tutoring appointment using the default client.
-pub async fn solicitar_tutoria(
-    token: &str,
-    payload: &SolicitudTutoria,
-) -> Result<(), CoreError> {
+pub async fn solicitar_tutoria(token: &str, payload: &SolicitudTutoria) -> Result<(), CoreError> {
     let client = MiupvClient::default();
     solicitar_tutoria_with_client(&client, token, payload).await
 }
@@ -74,6 +78,9 @@ pub async fn solicitar_tutoria_with_client(
         Ok(())
     } else {
         let msg = res.text().await.unwrap_or_default();
-        Err(CoreError::Api { status, message: msg })
+        Err(CoreError::Api {
+            status,
+            message: msg,
+        })
     }
 }

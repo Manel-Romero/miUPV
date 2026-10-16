@@ -33,7 +33,12 @@ pub struct Task {
     pub site_title: Option<String>,
 
     /// Due date string (ISO or formatted).
-    #[serde(alias = "due_date", alias = "dueTimeString", alias = "dueDate", default)]
+    #[serde(
+        alias = "due_date",
+        alias = "dueTimeString",
+        alias = "dueDate",
+        default
+    )]
     pub due_date: Option<String>,
 
     /// Detailed instructions for completing the task.
@@ -45,7 +50,11 @@ pub struct Task {
     pub status: Option<String>,
 
     /// List of attachment URLs or filenames.
-    #[serde(alias = "attachments", default, deserialize_with = "deserialize_attachments")]
+    #[serde(
+        alias = "attachments",
+        default,
+        deserialize_with = "deserialize_attachments"
+    )]
     pub attachments: Vec<String>,
 }
 

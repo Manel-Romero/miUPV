@@ -20,11 +20,15 @@ pub async fn get_person_data_with_client(
     let base = client.config().www_base_url.trim_end_matches('/');
     let url = format!("{base}/pls/sorest/sic_app_miupv.get_person_data?p_idioma={lang}");
 
-    let res = client.authed_request(Method::GET, &url, token).send().await?;
+    let res = client
+        .authed_request(Method::GET, &url, token)
+        .send()
+        .await?;
     if res.status().is_success() {
         if let Ok(body) = client.handle_response_text(res).await {
             if let Ok(mut data) = parse_json_single_or_first::<PersonData>(&body) {
-                if (data.nombre.is_empty() || data.apellidos.is_empty()) && data.full_name.is_some() {
+                if (data.nombre.is_empty() || data.apellidos.is_empty()) && data.full_name.is_some()
+                {
                     let full = data.full_name.as_deref().unwrap_or("").trim();
                     if let Some((aps, nom)) = full.split_once(',') {
                         data.apellidos = aps.trim().to_string();
@@ -56,9 +60,14 @@ pub async fn get_person_data_with_client(
         "en" | "i" => "i",
         _ => "c",
     };
-    let menu_url = format!("{intranet_base}/pls/soalu/sic_menu.MiUPV?P_IDIOMA={intra_lang}&P_MODO=alumno");
+    let menu_url =
+        format!("{intranet_base}/pls/soalu/sic_menu.MiUPV?P_IDIOMA={intra_lang}&P_MODO=alumno");
 
-    if let Ok(res_intra) = client.authed_request(Method::GET, &menu_url, token).send().await {
+    if let Ok(res_intra) = client
+        .authed_request(Method::GET, &menu_url, token)
+        .send()
+        .await
+    {
         if res_intra.status().is_success() {
             let bytes = res_intra.bytes().await.unwrap_or_default();
             // Decode ISO-8859-15 / Latin1 cleanly to preserve Spanish diacritics
@@ -129,4 +138,3 @@ mod tests {
         assert_eq!(apellidos, expected_apellidos);
     }
 }
-

@@ -163,7 +163,10 @@ impl MiupvClient {
             .unwrap_or(token.trim());
 
         let mut headers = HeaderMap::new();
-        headers.insert(ACCEPT, HeaderValue::from_static("application/json, text/html, */*"));
+        headers.insert(
+            ACCEPT,
+            HeaderValue::from_static("application/json, text/html, */*"),
+        );
         headers.insert(
             USER_AGENT,
             HeaderValue::from_static("miUPV-CLI/0.1.0 (Linux)"),
@@ -187,10 +190,7 @@ impl MiupvClient {
         url: &str,
         token: &str,
     ) -> Result<T, CoreError> {
-        let res = self
-            .authed_request(Method::GET, url, token)
-            .send()
-            .await?;
+        let res = self.authed_request(Method::GET, url, token).send().await?;
         self.handle_response(res).await
     }
 
@@ -200,10 +200,7 @@ impl MiupvClient {
         url: &str,
         token: &str,
     ) -> Result<Vec<T>, CoreError> {
-        let res = self
-            .authed_request(Method::GET, url, token)
-            .send()
-            .await?;
+        let res = self.authed_request(Method::GET, url, token).send().await?;
         let text = self.handle_response_text(res).await?;
         parse_json_list(&text)
     }
@@ -229,10 +226,7 @@ impl MiupvClient {
         url: &str,
         token: &str,
     ) -> Result<T, CoreError> {
-        let res = self
-            .authed_request(Method::POST, url, token)
-            .send()
-            .await?;
+        let res = self.authed_request(Method::POST, url, token).send().await?;
         self.handle_response(res).await
     }
 
@@ -328,7 +322,8 @@ pub fn parse_json_list<T: DeserializeOwned>(body: &str) -> Result<Vec<T>, CoreEr
     // 2. Inspection of wrapped JSON objects / collections
     if let Ok(val) = serde_json::from_str::<serde_json::Value>(body) {
         if let Some(arr) = val.as_array() {
-            return serde_json::from_value(serde_json::Value::Array(arr.clone())).map_err(Into::into);
+            return serde_json::from_value(serde_json::Value::Array(arr.clone()))
+                .map_err(Into::into);
         }
         for key in [
             "items",

@@ -56,7 +56,10 @@ pub async fn run(
     };
 
     if user.is_empty() || pass.is_empty() {
-        eprintln!("{}", ui::error("El usuario y la contraseña no pueden estar vacíos."));
+        eprintln!(
+            "{}",
+            ui::error("El usuario y la contraseña no pueden estar vacíos.")
+        );
         return Ok(());
     }
 
@@ -67,10 +70,20 @@ pub async fn run(
                 let _ = auth_service::save_credentials(&user, &pass);
                 if let Err(e) = auth_service::save_tokens(&tokens) {
                     spinner.finish_and_clear();
-                    eprintln!("{}", ui::warning(&format!("Sesión iniciada, pero hubo un error guardando en el keyring: {e}")));
+                    eprintln!(
+                        "{}",
+                        ui::warning(&format!(
+                            "Sesión iniciada, pero hubo un error guardando en el keyring: {e}"
+                        ))
+                    );
                 } else {
                     spinner.finish_and_clear();
-                    println!("{}", ui::success("Sesión iniciada correctamente vía OAuth 2.0 (App Oficial UPV)."));
+                    println!(
+                        "{}",
+                        ui::success(
+                            "Sesión iniciada correctamente vía OAuth 2.0 (App Oficial UPV)."
+                        )
+                    );
                     println!("{}", ui::info("Credenciales guardadas con seguridad para autorrenovación permanente de tokens."));
                 }
                 return Ok(());
@@ -78,7 +91,10 @@ pub async fn run(
             Err(err) => {
                 spinner.finish_and_clear();
                 if pkce {
-                    eprintln!("{}", ui::error(&format!("Error de autenticación PKCE: {err}")));
+                    eprintln!(
+                        "{}",
+                        ui::error(&format!("Error de autenticación PKCE: {err}"))
+                    );
                     return Ok(());
                 }
                 tracing::warn!("Intento OAuth falló ({err}), probando portal Intranet CAS...");
@@ -92,7 +108,12 @@ pub async fn run(
             let _ = auth_service::save_credentials(&user, &pass);
             if let Err(e) = auth_service::save_tokens(&tokens) {
                 spinner.finish_and_clear();
-                eprintln!("{}", ui::warning(&format!("Sesión iniciada, pero hubo un error guardando en el keyring: {e}")));
+                eprintln!(
+                    "{}",
+                    ui::warning(&format!(
+                        "Sesión iniciada, pero hubo un error guardando en el keyring: {e}"
+                    ))
+                );
             } else {
                 spinner.finish_and_clear();
                 println!("{}", ui::success("Sesión iniciada correctamente en la Intranet UPV. Cookie de sesión capturada."));
@@ -100,7 +121,10 @@ pub async fn run(
         }
         Err(err) => {
             spinner.finish_and_clear();
-            eprintln!("{}", ui::error(&format!("Error de autenticación Intranet: {err}")));
+            eprintln!(
+                "{}",
+                ui::error(&format!("Error de autenticación Intranet: {err}"))
+            );
         }
     }
 

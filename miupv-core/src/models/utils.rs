@@ -72,10 +72,7 @@ where
             if cleaned.is_empty() || cleaned.eq_ignore_ascii_case("null") || cleaned == "-" {
                 Ok(None)
             } else {
-                cleaned
-                    .parse::<f64>()
-                    .map(Some)
-                    .map_err(de::Error::custom)
+                cleaned.parse::<f64>().map(Some).map_err(de::Error::custom)
             }
         }
     }

@@ -21,7 +21,10 @@ pub async fn get_cabinas_disponibles_with_client(
     let base = client.config().aplicat_base_url.trim_end_matches('/');
     let url = format!("{base}/restreservas-1.0/franjas?idEntidad=105&fecha={fecha}&sololibres=S");
 
-    let res = client.authed_request(Method::GET, &url, token).send().await?;
+    let res = client
+        .authed_request(Method::GET, &url, token)
+        .send()
+        .await?;
     let body = client.handle_response_text(res).await?;
     parse_json_list(&body)
 }
@@ -41,7 +44,10 @@ pub async fn get_mis_reservas_with_client(
     let base = client.config().aplicat_base_url.trim_end_matches('/');
     let url = format!("{base}/restreservas-1.0/franjas?idEntidad=105&nip={nip}");
 
-    let res = client.authed_request(Method::GET, &url, token).send().await?;
+    let res = client
+        .authed_request(Method::GET, &url, token)
+        .send()
+        .await?;
     let body = client.handle_response_text(res).await?;
     parse_json_list(&body)
 }
@@ -101,6 +107,9 @@ pub async fn liberar_cabina_with_client(
         Ok(())
     } else {
         let msg = res.text().await.unwrap_or_default();
-        Err(CoreError::Api { status, message: msg })
+        Err(CoreError::Api {
+            status,
+            message: msg,
+        })
     }
 }

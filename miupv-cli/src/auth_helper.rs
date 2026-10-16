@@ -9,7 +9,9 @@ pub async fn get_valid_token() -> Result<String, Box<dyn std::error::Error>> {
         Some(t) => t,
         None => {
             if let Some((u, p)) = auth_service::load_credentials() {
-                tracing::info!("No active token, but stored credentials found. Performing automatic login...");
+                tracing::info!(
+                    "No active token, but stored credentials found. Performing automatic login..."
+                );
                 if let Ok(new_tokens) = auth_service::login_pkce(&u, &p).await {
                     let _ = auth_service::save_tokens(&new_tokens);
                     return Ok(new_tokens.access_token);

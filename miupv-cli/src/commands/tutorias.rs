@@ -30,7 +30,10 @@ pub async fn run(
                 }
                 Err(err) => {
                     spinner.finish_and_clear();
-                    eprintln!("{}", ui::error(&format!("Error al obtener las tutorías: {err}")));
+                    eprintln!(
+                        "{}",
+                        ui::error(&format!("Error al obtener las tutorías: {err}"))
+                    );
                     return Ok(());
                 }
             };
@@ -41,19 +44,38 @@ pub async fn run(
             }
 
             if tutorias.is_empty() {
-                println!("{}", ui::info("No tienes tutorías solicitadas ni programadas."));
+                println!(
+                    "{}",
+                    ui::info("No tienes tutorías solicitadas ni programadas.")
+                );
                 return Ok(());
             }
 
-            println!("{}", console::style("Tus tutorías docentes:").bold().underlined());
+            println!(
+                "{}",
+                console::style("Tus tutorías docentes:").bold().underlined()
+            );
 
-            let mut table = ui::create_table(&["ID", "Asignatura", "Profesor", "Fecha", "Hora", "Lugar", "Estado"]);
+            let mut table = ui::create_table(&[
+                "ID",
+                "Asignatura",
+                "Profesor",
+                "Fecha",
+                "Hora",
+                "Lugar",
+                "Estado",
+            ]);
 
             for t in &tutorias {
                 let estado_cell = match t.estado.as_deref() {
                     Some(s) if s.to_uppercase().contains("ACEPT") => Cell::new(s).fg(Color::Green),
                     Some(s) if s.to_uppercase().contains("SOLIC") => Cell::new(s).fg(Color::Yellow),
-                    Some(s) if s.to_uppercase().contains("ANUL") || s.to_uppercase().contains("CANCEL") => Cell::new(s).fg(Color::Red),
+                    Some(s)
+                        if s.to_uppercase().contains("ANUL")
+                            || s.to_uppercase().contains("CANCEL") =>
+                    {
+                        Cell::new(s).fg(Color::Red)
+                    }
                     Some(s) => Cell::new(s),
                     None => Cell::new("PROGRAMADA").fg(Color::Green),
                 };
@@ -73,7 +95,8 @@ pub async fn run(
         }
 
         Some(TutoriasAction::Asignaturas) => {
-            let spinner = ui::create_spinner("Consultando asignaturas y profesores para tutorías...");
+            let spinner =
+                ui::create_spinner("Consultando asignaturas y profesores para tutorías...");
             let asignaturas = match tutorias_service::get_asignaturas(&token, lang).await {
                 Ok(a) => {
                     spinner.finish_and_clear();
@@ -81,7 +104,10 @@ pub async fn run(
                 }
                 Err(err) => {
                     spinner.finish_and_clear();
-                    eprintln!("{}", ui::error(&format!("Error al obtener asignaturas: {err}")));
+                    eprintln!(
+                        "{}",
+                        ui::error(&format!("Error al obtener asignaturas: {err}"))
+                    );
                     return Ok(());
                 }
             };
@@ -92,11 +118,19 @@ pub async fn run(
             }
 
             if asignaturas.is_empty() {
-                println!("{}", ui::info("No se encontraron asignaturas disponibles para tutorías."));
+                println!(
+                    "{}",
+                    ui::info("No se encontraron asignaturas disponibles para tutorías.")
+                );
                 return Ok(());
             }
 
-            println!("{}", console::style("Asignaturas disponibles para solicitar tutorías:").bold().underlined());
+            println!(
+                "{}",
+                console::style("Asignaturas disponibles para solicitar tutorías:")
+                    .bold()
+                    .underlined()
+            );
 
             let mut table = ui::create_table(&["Código", "Asignatura", "Profesorado"]);
 

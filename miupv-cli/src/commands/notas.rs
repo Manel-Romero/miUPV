@@ -31,7 +31,10 @@ pub async fn run(
         }
         Err(err) => {
             spinner.finish_and_clear();
-            eprintln!("{}", ui::error(&format!("Error al obtener las notas: {err}")));
+            eprintln!(
+                "{}",
+                ui::error(&format!("Error al obtener las notas: {err}"))
+            );
             return Ok(());
         }
     };
@@ -42,11 +45,21 @@ pub async fn run(
     }
 
     if scores.is_empty() {
-        println!("{}", ui::info(&format!("No se encontraron calificaciones registradas para el curso {curso}.")));
+        println!(
+            "{}",
+            ui::info(&format!(
+                "No se encontraron calificaciones registradas para el curso {curso}."
+            ))
+        );
         return Ok(());
     }
 
-    println!("{}", console::style(format!("Calificaciones del Curso {curso}:")).bold().underlined());
+    println!(
+        "{}",
+        console::style(format!("Calificaciones del Curso {curso}:"))
+            .bold()
+            .underlined()
+    );
 
     let mut table = ui::create_table(&[
         "Código",
@@ -63,13 +76,17 @@ pub async fn run(
             Some(n) => {
                 let text = format!("{:.1}", n);
                 if n >= 9.0 {
-                    Cell::new(text).fg(Color::Green).add_attribute(comfy_table::Attribute::Bold)
+                    Cell::new(text)
+                        .fg(Color::Green)
+                        .add_attribute(comfy_table::Attribute::Bold)
                 } else if n >= 7.0 {
                     Cell::new(text).fg(Color::Cyan)
                 } else if n >= 5.0 {
                     Cell::new(text)
                 } else {
-                    Cell::new(text).fg(Color::Red).add_attribute(comfy_table::Attribute::Bold)
+                    Cell::new(text)
+                        .fg(Color::Red)
+                        .add_attribute(comfy_table::Attribute::Bold)
                 }
             }
             None => Cell::new("-"),
@@ -86,7 +103,11 @@ pub async fn run(
             Cell::new(a.convocatoria.as_deref().unwrap_or("-")),
             nota_cell,
             calif_cell,
-            Cell::new(a.creditos.map(|c| format!("{:.1}", c)).unwrap_or_else(|| "-".to_string())),
+            Cell::new(
+                a.creditos
+                    .map(|c| format!("{:.1}", c))
+                    .unwrap_or_else(|| "-".to_string()),
+            ),
             Cell::new(a.fecha.as_deref().unwrap_or("-")),
         ]);
     }

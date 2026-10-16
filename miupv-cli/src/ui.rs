@@ -37,9 +37,11 @@ pub fn create_table(headers: &[&str]) -> Table {
         .apply_modifier(UTF8_ROUND_CORNERS)
         .set_content_arrangement(ContentArrangement::Dynamic);
 
-    let header_cells = headers
-        .iter()
-        .map(|h| Cell::new(h).fg(Color::Cyan).add_attribute(comfy_table::Attribute::Bold));
+    let header_cells = headers.iter().map(|h| {
+        Cell::new(h)
+            .fg(Color::Cyan)
+            .add_attribute(comfy_table::Attribute::Bold)
+    });
 
     table.set_header(header_cells);
     table

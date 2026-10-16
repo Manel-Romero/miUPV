@@ -1,0 +1,124 @@
+name: Auto Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag de la release (ej: v0.1.0)'
+        required: true
+        default: 'v0.1.0'
+
+permissions:
+  contents: write
+
+jobs:
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    outputs:
+      release_tag: ${{ steps.tag.outputs.val }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Determine release tag
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "val=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "val=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.val }}
+          name: miUPV ${{ steps.tag.outputs.val }}
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-release:
+    name: Build & Package (${{ matrix.target }})
+    needs: create-release
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+            bin: miupv
+            archive_ext: tar.gz
+          - target: x86_64-apple-darwin
+            os: macos-13
+            bin: miupv
+            archive_ext: tar.gz
+          - target: aarch64-apple-darwin
+            os: macos-latest
+            bin: miupv
+            archive_ext: tar.gz
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+            bin: miupv.exe
+            archive_ext: zip
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Linux dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libdbus-1-dev pkg-config
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Build release binary
+        run: cargo build --release --locked --bin miupv --target ${{ matrix.target }}
+
+      - name: Package artifacts (Unix)
+        if: matrix.os != 'windows-latest'
+        shell: bash
+        run: |
+          TAG="${{ needs.create-release.outputs.release_tag }}"
+          ARCHIVE_NAME="miupv-${TAG}-${{ matrix.target }}"
+          DIR="staging/${ARCHIVE_NAME}"
+          mkdir -p "${DIR}"
+          cp "target/${{ matrix.target }}/release/miupv" "${DIR}/"
+          cp README.md LICENSE "${DIR}/"
+          tar -czvf "${ARCHIVE_NAME}.tar.gz" -C staging "${ARCHIVE_NAME}"
+          sha256sum "${ARCHIVE_NAME}.tar.gz" > "${ARCHIVE_NAME}.tar.gz.sha256"
+
+      - name: Package artifacts (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: bash
+        run: |
+          TAG="${{ needs.create-release.outputs.release_tag }}"
+          ARCHIVE_NAME="miupv-${TAG}-${{ matrix.target }}"
+          DIR="staging/${ARCHIVE_NAME}"
+          mkdir -p "${DIR}"
+          cp "target/${{ matrix.target }}/release/miupv.exe" "${DIR}/"
+          cp README.md LICENSE "${DIR}/"
+          7z a "${ARCHIVE_NAME}.zip" "./staging/${ARCHIVE_NAME}/*"
+          sha256sum "${ARCHIVE_NAME}.zip" > "${ARCHIVE_NAME}.zip.sha256"
+
+      - name: Upload asset to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.create-release.outputs.release_tag }}
+          files: |
+            miupv-${{ needs.create-release.outputs.release_tag }}-${{ matrix.target }}.${{ matrix.archive_ext }}
+            miupv-${{ needs.create-release.outputs.release_tag }}-${{ matrix.target }}.${{ matrix.archive_ext }}.sha256
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

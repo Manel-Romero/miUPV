@@ -27,7 +27,7 @@ pub fn normalize_fecha(fecha: &str) -> String {
     if digits.len() == 8 {
         // If in DDMMYYYY format (starts with day <= 31 and ends with year >= 2020)
         if trimmed.contains('/') || trimmed.contains('-') {
-            let parts: Vec<&str> = trimmed.split(|c| c == '-' || c == '/').collect();
+            let parts: Vec<&str> = trimmed.split(['-', '/']).collect();
             if parts.len() == 3 && parts[0].len() == 4 {
                 // YYYY-MM-DD
                 return format!("{}{}{}", parts[0], parts[1], parts[2]);
@@ -76,7 +76,9 @@ pub async fn resolve_deporte(
             // Attempt to look up in the live list of sports
             if let Ok(list) = get_deportes_with_client(client, token, campus, lang).await {
                 for item in list {
-                    if item.nombre.to_lowercase().contains(&lower) || lower.contains(&item.nombre.to_lowercase()) {
+                    if item.nombre.to_lowercase().contains(&lower)
+                        || lower.contains(&item.nombre.to_lowercase())
+                    {
                         return item.id;
                     }
                 }
@@ -87,7 +89,11 @@ pub async fn resolve_deporte(
 }
 
 /// Fetches list of available sports in a campus using the default client.
-pub async fn get_deportes(token: &str, campus: &str, lang: &str) -> Result<Vec<DeporteItem>, CoreError> {
+pub async fn get_deportes(
+    token: &str,
+    campus: &str,
+    lang: &str,
+) -> Result<Vec<DeporteItem>, CoreError> {
     let client = MiupvClient::default();
     get_deportes_with_client(&client, token, campus, lang).await
 }
@@ -103,7 +109,10 @@ pub async fn get_deportes_with_client(
     let c_code = normalize_campus(campus);
     let url = format!("{base}/pls/sorest/sic_app_deportes.lista_deportes?p_campus={c_code}&p_idioma={lang}&p_solo_compartidas=N");
 
-    let res = client.authed_request(Method::GET, &url, token).send().await?;
+    let res = client
+        .authed_request(Method::GET, &url, token)
+        .send()
+        .await?;
     let body = client.handle_response_text(res).await?;
     parse_json_list(&body)
 }
@@ -123,7 +132,10 @@ pub async fn get_mis_reservas_with_client(
     let base = client.config().www_base_url.trim_end_matches('/');
     let url = format!("{base}/pls/sorest/sic_app_deportes.mis_reservas?p_idioma={lang}");
 
-    let res = client.authed_request(Method::GET, &url, token).send().await?;
+    let res = client
+        .authed_request(Method::GET, &url, token)
+        .send()
+        .await?;
     let body = client.handle_response_text(res).await?;
     parse_json_list(&body)
 }
@@ -158,7 +170,10 @@ pub async fn get_reservas_disponibles_with_client(
         "{base}/pls/sorest/sic_app_deportes.reservas_disponibles?p_campus={campus_code}&p_deporte={dep_id}&p_fecha={fecha_code}&p_pista=-1&p_mantar=&p_nivel_min=&p_nivel_max=&p_tipo_partida=&p_idioma={lang}"
     );
 
-    let res = client.authed_request(Method::GET, &url, token).send().await?;
+    let res = client
+        .authed_request(Method::GET, &url, token)
+        .send()
+        .await?;
     let body = client.handle_response_text(res).await?;
 
     let pistas: Vec<PistaConReservas> = parse_json_list(&body)?;
@@ -174,7 +189,11 @@ pub async fn get_reservas_disponibles_with_client(
             };
 
             reservas.push(ReservaDeporte {
-                id: Some(format!("{}_{}", pista.pista, slot.hora_ini.replace(':', ""))),
+                id: Some(format!(
+                    "{}_{}",
+                    pista.pista,
+                    slot.hora_ini.replace(':', "")
+                )),
                 campus: Some(campus_code.to_string()),
                 deporte: Some(deporte.to_string()),
                 pista: Some(pista.nompista.clone()),

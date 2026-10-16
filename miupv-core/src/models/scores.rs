@@ -7,11 +7,23 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Asignatura {
     /// Subject code (e.g. "11542").
-    #[serde(alias = "CODIGO", alias = "cod_asi", alias = "codigo_asignatura", alias = "id", alias = "ASI")]
+    #[serde(
+        alias = "CODIGO",
+        alias = "cod_asi",
+        alias = "codigo_asignatura",
+        alias = "id",
+        alias = "ASI"
+    )]
     pub codigo: String,
 
     /// Subject name.
-    #[serde(alias = "NOMBRE", alias = "nom_asi", alias = "nombre_asignatura", alias = "desc", alias = "NOMASI")]
+    #[serde(
+        alias = "NOMBRE",
+        alias = "nom_asi",
+        alias = "nombre_asignatura",
+        alias = "desc",
+        alias = "NOMASI"
+    )]
     pub nombre: String,
 
     /// Exam session / term (e.g. "Ordinaria", "Extraordinaria", "1").
@@ -28,7 +40,12 @@ pub struct Asignatura {
     pub nota: Option<f64>,
 
     /// Textual qualification (e.g. "Aprobado", "Notable", "Sobresaliente", "Suspenso").
-    #[serde(alias = "CALIFICACION", alias = "calificacion", alias = "calif", default)]
+    #[serde(
+        alias = "CALIFICACION",
+        alias = "calificacion",
+        alias = "calif",
+        default
+    )]
     pub calificacion: Option<String>,
 
     /// Number of ECTS credits.
@@ -42,7 +59,13 @@ pub struct Asignatura {
     pub creditos: Option<f64>,
 
     /// Date the score was published or recorded.
-    #[serde(alias = "FECHA", alias = "fecha", alias = "fec_eval", alias = "FECHA_PUB", default)]
+    #[serde(
+        alias = "FECHA",
+        alias = "fecha",
+        alias = "fec_eval",
+        alias = "FECHA_PUB",
+        default
+    )]
     pub fecha: Option<String>,
 }
 
@@ -70,7 +93,12 @@ pub struct Statistics {
     pub sobresalientes: Option<u32>,
 
     /// Number of matriculas de honor.
-    #[serde(alias = "MATRICULAS_HONOR", alias = "mh", alias = "matriculas_honor", default)]
+    #[serde(
+        alias = "MATRICULAS_HONOR",
+        alias = "mh",
+        alias = "matriculas_honor",
+        default
+    )]
     pub matriculas_honor: Option<u32>,
 
     /// Number of failing grades (< 5.0).
@@ -78,7 +106,12 @@ pub struct Statistics {
     pub suspensos: Option<u32>,
 
     /// Number of students not attending.
-    #[serde(alias = "NO_PRESENTADOS", alias = "no_presentados", alias = "np", default)]
+    #[serde(
+        alias = "NO_PRESENTADOS",
+        alias = "no_presentados",
+        alias = "np",
+        default
+    )]
     pub no_presentados: Option<u32>,
 
     /// Average score.

@@ -71,7 +71,10 @@ pub async fn run(action: AuthAction) -> Result<(), Box<dyn std::error::Error>> {
                     }
                     Err(e) => {
                         spinner.finish_and_clear();
-                        eprintln!("{}", ui::error(&format!("Error renovando con credenciales: {e}")));
+                        eprintln!(
+                            "{}",
+                            ui::error(&format!("Error renovando con credenciales: {e}"))
+                        );
                     }
                 }
             } else if let Some(tokens) = auth_service::load_tokens()? {
@@ -80,7 +83,10 @@ pub async fn run(action: AuthAction) -> Result<(), Box<dyn std::error::Error>> {
                         Ok(new_tokens) => {
                             auth_service::save_tokens(&new_tokens)?;
                             spinner.finish_and_clear();
-                            println!("{}", ui::success("Token de acceso renovado con éxito (24h)."));
+                            println!(
+                                "{}",
+                                ui::success("Token de acceso renovado con éxito (24h).")
+                            );
                             return Ok(());
                         }
                         Err(e) => {
@@ -131,7 +137,10 @@ pub async fn run(action: AuthAction) -> Result<(), Box<dyn std::error::Error>> {
                 ]);
                 table.add_row(vec![Cell::new("Tipo de token"), Cell::new(tipo)]);
                 table.add_row(vec![Cell::new("Token (enmascarado)"), Cell::new(&masked)]);
-                table.add_row(vec![Cell::new("Fecha de expiración"), Cell::new(&expiry_str)]);
+                table.add_row(vec![
+                    Cell::new("Fecha de expiración"),
+                    Cell::new(&expiry_str),
+                ]);
                 table.add_row(vec![
                     Cell::new("Token de refresco"),
                     Cell::new(if tokens.refresh_token.is_empty() {

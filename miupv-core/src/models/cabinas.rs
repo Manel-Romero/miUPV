@@ -11,11 +11,21 @@ pub struct Cabina {
     pub id: String,
 
     /// Cabin name or code (e.g. "Cabina 1 - Central").
-    #[serde(alias = "nombre", alias = "recurso", alias = "espacio", alias = "nom_recurso")]
+    #[serde(
+        alias = "nombre",
+        alias = "recurso",
+        alias = "espacio",
+        alias = "nom_recurso"
+    )]
     pub nombre: String,
 
     /// Library campus or building name.
-    #[serde(alias = "biblioteca", alias = "entidad", alias = "nom_entidad", default)]
+    #[serde(
+        alias = "biblioteca",
+        alias = "entidad",
+        alias = "nom_entidad",
+        default
+    )]
     pub biblioteca: Option<String>,
 
     /// Date string (e.g. "2025-03-15").
@@ -23,7 +33,12 @@ pub struct Cabina {
     pub fecha: Option<String>,
 
     /// Start time string (e.g. "10:00").
-    #[serde(alias = "hora_ini", alias = "horaInicio", alias = "hora_inicio", default)]
+    #[serde(
+        alias = "hora_ini",
+        alias = "horaInicio",
+        alias = "hora_inicio",
+        default
+    )]
     pub hora_ini: Option<String>,
 
     /// End time string (e.g. "12:00").
@@ -31,7 +46,11 @@ pub struct Cabina {
     pub hora_fin: Option<String>,
 
     /// Whether this cabin slot is available for booking.
-    #[serde(alias = "libre", default, deserialize_with = "deserialize_flexible_bool")]
+    #[serde(
+        alias = "libre",
+        default,
+        deserialize_with = "deserialize_flexible_bool"
+    )]
     pub libre: bool,
 
     /// Maximum capacity of the cabin.

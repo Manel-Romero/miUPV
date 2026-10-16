@@ -50,7 +50,10 @@ pub async fn get_ical_events_with_client(
         "{base}/pls/soalu/sic_app_ical.geteventos?p_fecha_ini={ini_fmt}&p_fecha_fin={fin_fmt}&p_idioma={lang}&p_modo="
     );
 
-    let res = client.authed_request(Method::GET, &url, token).send().await?;
+    let res = client
+        .authed_request(Method::GET, &url, token)
+        .send()
+        .await?;
     let body = client.handle_response_text(res).await?;
     parse_json_list(&body)
 }
@@ -177,10 +180,15 @@ pub fn get_calendar_cache_path() -> PathBuf {
         return PathBuf::from(custom);
     }
     if let Ok(cache_home) = std::env::var("XDG_CACHE_HOME") {
-        return PathBuf::from(cache_home).join("miupv").join("calendar_cache.json");
+        return PathBuf::from(cache_home)
+            .join("miupv")
+            .join("calendar_cache.json");
     }
     if let Ok(home) = std::env::var("HOME") {
-        return PathBuf::from(home).join(".cache").join("miupv").join("calendar_cache.json");
+        return PathBuf::from(home)
+            .join(".cache")
+            .join("miupv")
+            .join("calendar_cache.json");
     }
     PathBuf::from("/tmp/miupv_calendar_cache.json")
 }

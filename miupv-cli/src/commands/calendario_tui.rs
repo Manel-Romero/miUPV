@@ -34,7 +34,8 @@ pub struct ParsedEvent {
 
 impl ParsedEvent {
     pub fn from_cal_event(ev: &CalEvent) -> Self {
-        let (date, start_time, end_time) = parse_event_times(&ev.fecha_ini, &ev.fecha_fin, ev.todo_dia);
+        let (date, start_time, end_time) =
+            parse_event_times(&ev.fecha_ini, &ev.fecha_fin, ev.todo_dia);
         let (subject_title, teacher, teaching_type, pod_group, clean_desc) =
             parse_html_description(ev.descripcion.as_deref().unwrap_or(""));
 
@@ -62,7 +63,10 @@ impl ParsedEvent {
             teacher,
             teaching_type,
             pod_group,
-            classroom: ev.lugar.clone().unwrap_or_else(|| "Sin aula asignada".to_string()),
+            classroom: ev
+                .lugar
+                .clone()
+                .unwrap_or_else(|| "Sin aula asignada".to_string()),
             category: cat,
             raw_desc: clean_desc,
             is_all_day: ev.todo_dia,
@@ -93,7 +97,12 @@ pub struct CalendarApp {
 }
 
 impl CalendarApp {
-    pub fn new(token: String, lang: String, initial_events: Vec<CalEvent>, last_synced: Option<DateTime<Utc>>) -> Self {
+    pub fn new(
+        token: String,
+        lang: String,
+        initial_events: Vec<CalEvent>,
+        last_synced: Option<DateTime<Utc>>,
+    ) -> Self {
         let mut app = Self {
             days: Vec::new(),
             selected_day_idx: 0,
@@ -113,8 +122,13 @@ impl CalendarApp {
     }
 
     pub fn set_events(&mut self, raw_events: Vec<CalEvent>) {
-        let mut parsed: Vec<ParsedEvent> = raw_events.iter().map(ParsedEvent::from_cal_event).collect();
-        parsed.sort_by(|a, b| a.date.cmp(&b.date).then_with(|| a.start_time.cmp(&b.start_time)));
+        let mut parsed: Vec<ParsedEvent> =
+            raw_events.iter().map(ParsedEvent::from_cal_event).collect();
+        parsed.sort_by(|a, b| {
+            a.date
+                .cmp(&b.date)
+                .then_with(|| a.start_time.cmp(&b.start_time))
+        });
 
         let today = Local::now().date_naive();
         let min_date = today - Duration::days(14);
@@ -273,7 +287,12 @@ pub async fn run_calendar_tui(token: &str, lang: &str) -> Result<(), Box<dyn std
         None => (Vec::new(), None),
     };
 
-    let mut app = CalendarApp::new(token.to_string(), lang.to_string(), initial_events, last_synced);
+    let mut app = CalendarApp::new(
+        token.to_string(),
+        lang.to_string(),
+        initial_events,
+        last_synced,
+    );
 
     // 2. Setup background channel and trigger automatic background refresh
     let (tx, mut rx) = mpsc::channel::<Result<Vec<CalEvent>, String>>(4);
@@ -346,12 +365,14 @@ async fn run_app_loop(
                         KeyCode::Char('t') => {
                             app.select_today_or_next();
                         }
-                        KeyCode::Char('r') => {
-                            if !app.is_syncing {
-                                app.is_syncing = true;
-                                app.sync_error = None;
-                                trigger_background_sync(app.token.clone(), app.lang.clone(), tx.clone());
-                            }
+                        KeyCode::Char('r') if !app.is_syncing => {
+                            app.is_syncing = true;
+                            app.sync_error = None;
+                            trigger_background_sync(
+                                app.token.clone(),
+                                app.lang.clone(),
+                                tx.clone(),
+                            );
                         }
                         _ => {}
                     }
@@ -389,7 +410,9 @@ fn draw_header(frame: &mut ratatui::Frame, area: Rect, app: &CalendarApp, spinne
         let spin = spinner_chars[app.spinner_idx];
         Span::styled(
             format!(" {spin} Sincronizando con UPV... "),
-            Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD),
+            Style::default()
+                .fg(Color::Yellow)
+                .add_modifier(Modifier::BOLD),
         )
     } else if let Some(err) = &app.sync_error {
         Span::styled(
@@ -414,9 +437,20 @@ fn draw_header(frame: &mut ratatui::Frame, area: Rect, app: &CalendarApp, spinne
     };
 
     let title_line = Line::from(vec![
-        Span::styled(" miUPV ", Style::default().fg(Color::Black).bg(Color::Cyan).add_modifier(Modifier::BOLD)),
+        Span::styled(
+            " miUPV ",
+            Style::default()
+                .fg(Color::Black)
+                .bg(Color::Cyan)
+                .add_modifier(Modifier::BOLD),
+        ),
         Span::raw("  "),
-        Span::styled("HORARIO Y CALENDARIO ACADÉMICO", Style::default().fg(Color::White).add_modifier(Modifier::BOLD)),
+        Span::styled(
+            "HORARIO Y CALENDARIO ACADÉMICO",
+            Style::default()
+                .fg(Color::White)
+                .add_modifier(Modifier::BOLD),
+        ),
         Span::raw("  •  "),
         Span::styled(today_str, Style::default().fg(Color::DarkGray)),
         Span::raw("  "),
@@ -467,18 +501,37 @@ fn draw_days_list(frame: &mut ratatui::Frame, area: Rect, app: &CalendarApp) {
             };
 
             let prefix = if is_selected { "▶ " } else { "  " };
-            let date_str = format!("{:02}/{:02} {}", bucket.date.day(), bucket.date.month(), weekday);
+            let date_str = format!(
+                "{:02}/{:02} {}",
+                bucket.date.day(),
+                bucket.date.month(),
+                weekday
+            );
 
             let (label, badge_style) = if is_today {
-                (format!("{prefix}{date_str} (Hoy)"), Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))
+                (
+                    format!("{prefix}{date_str} (Hoy)"),
+                    Style::default()
+                        .fg(Color::Cyan)
+                        .add_modifier(Modifier::BOLD),
+                )
             } else if count > 0 {
-                (format!("{prefix}{date_str} [{count}]"), Style::default().fg(Color::White))
+                (
+                    format!("{prefix}{date_str} [{count}]"),
+                    Style::default().fg(Color::White),
+                )
             } else {
-                (format!("{prefix}{date_str}"), Style::default().fg(Color::DarkGray))
+                (
+                    format!("{prefix}{date_str}"),
+                    Style::default().fg(Color::DarkGray),
+                )
             };
 
             let item_style = if is_selected {
-                Style::default().fg(Color::Black).bg(Color::Cyan).add_modifier(Modifier::BOLD)
+                Style::default()
+                    .fg(Color::Black)
+                    .bg(Color::Cyan)
+                    .add_modifier(Modifier::BOLD)
             } else {
                 badge_style
             };
@@ -517,7 +570,11 @@ fn draw_day_events(frame: &mut ratatui::Frame, area: Rect, app: &CalendarApp) {
 
     let header_title = if let Some(b) = current_bucket {
         let tag = if b.date == today { " (HOY)" } else { "" };
-        format!(" Clases y Actividades: {}{} ", format_spanish_date(b.date), tag)
+        format!(
+            " Clases y Actividades: {}{} ",
+            format_spanish_date(b.date),
+            tag
+        )
     } else {
         " Clases y Actividades ".to_string()
     };
@@ -555,7 +612,9 @@ fn draw_day_events(frame: &mut ratatui::Frame, area: Rect, app: &CalendarApp) {
 
                 let time_span = Span::styled(
                     format!("{}{} - {} ", marker, ev.start_time, ev.end_time),
-                    Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD),
+                    Style::default()
+                        .fg(Color::Yellow)
+                        .add_modifier(Modifier::BOLD),
                 );
 
                 let acronym_span = Span::styled(
@@ -566,7 +625,9 @@ fn draw_day_events(frame: &mut ratatui::Frame, area: Rect, app: &CalendarApp) {
                 let title_span = Span::styled(
                     &ev.subject_title,
                     if is_selected {
-                        Style::default().fg(Color::White).add_modifier(Modifier::BOLD)
+                        Style::default()
+                            .fg(Color::White)
+                            .add_modifier(Modifier::BOLD)
                     } else {
                         Style::default().fg(Color::White)
                     },
@@ -619,56 +680,111 @@ fn draw_event_detail(frame: &mut ratatui::Frame, area: Rect, app: &CalendarApp) 
         let mut text_lines = Vec::new();
 
         text_lines.push(Line::from(vec![
-            Span::styled("Asignatura: ", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
-            Span::styled(&ev.subject_title, Style::default().fg(Color::White).add_modifier(Modifier::BOLD)),
+            Span::styled(
+                "Asignatura: ",
+                Style::default()
+                    .fg(Color::Cyan)
+                    .add_modifier(Modifier::BOLD),
+            ),
+            Span::styled(
+                &ev.subject_title,
+                Style::default()
+                    .fg(Color::White)
+                    .add_modifier(Modifier::BOLD),
+            ),
         ]));
 
         text_lines.push(Line::from(vec![
-            Span::styled("Categoría:  ", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
-            Span::styled(format!("[{}]", ev.category), Style::default().fg(ev.color).add_modifier(Modifier::BOLD)),
             Span::styled(
-                if ev.is_all_day { " (Día completo)" } else { "" },
+                "Categoría:  ",
+                Style::default()
+                    .fg(Color::Cyan)
+                    .add_modifier(Modifier::BOLD),
+            ),
+            Span::styled(
+                format!("[{}]", ev.category),
+                Style::default().fg(ev.color).add_modifier(Modifier::BOLD),
+            ),
+            Span::styled(
+                if ev.is_all_day {
+                    " (Día completo)"
+                } else {
+                    ""
+                },
                 Style::default().fg(Color::Yellow),
             ),
         ]));
 
         text_lines.push(Line::from(vec![
-            Span::styled("Horario:    ", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
             Span::styled(
-                format!("{} - {} ({})", ev.start_time, ev.end_time, format_spanish_date(ev.date)),
+                "Horario:    ",
+                Style::default()
+                    .fg(Color::Cyan)
+                    .add_modifier(Modifier::BOLD),
+            ),
+            Span::styled(
+                format!(
+                    "{} - {} ({})",
+                    ev.start_time,
+                    ev.end_time,
+                    format_spanish_date(ev.date)
+                ),
                 Style::default().fg(Color::Yellow),
             ),
         ]));
 
         text_lines.push(Line::from(vec![
-            Span::styled("Ubicación:  ", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
+            Span::styled(
+                "Ubicación:  ",
+                Style::default()
+                    .fg(Color::Cyan)
+                    .add_modifier(Modifier::BOLD),
+            ),
             Span::styled(&ev.classroom, Style::default().fg(Color::White)),
         ]));
 
         if let Some(t) = &ev.teacher {
             text_lines.push(Line::from(vec![
-                Span::styled("Profesor:   ", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
+                Span::styled(
+                    "Profesor:   ",
+                    Style::default()
+                        .fg(Color::Cyan)
+                        .add_modifier(Modifier::BOLD),
+                ),
                 Span::styled(t, Style::default().fg(Color::Green)),
             ]));
         }
 
         if let Some(doc) = &ev.teaching_type {
             text_lines.push(Line::from(vec![
-                Span::styled("Docencia:   ", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
+                Span::styled(
+                    "Docencia:   ",
+                    Style::default()
+                        .fg(Color::Cyan)
+                        .add_modifier(Modifier::BOLD),
+                ),
                 Span::styled(doc, Style::default().fg(Color::Magenta)),
             ]));
         }
 
         if let Some(pod) = &ev.pod_group {
             text_lines.push(Line::from(vec![
-                Span::styled("Grupo POD:  ", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
+                Span::styled(
+                    "Grupo POD:  ",
+                    Style::default()
+                        .fg(Color::Cyan)
+                        .add_modifier(Modifier::BOLD),
+                ),
                 Span::styled(pod, Style::default().fg(Color::Gray)),
             ]));
         }
 
         if !ev.raw_desc.is_empty() && ev.teacher.is_none() && ev.teaching_type.is_none() {
             text_lines.push(Line::raw(""));
-            text_lines.push(Line::from(Span::styled(&ev.raw_desc, Style::default().fg(Color::Gray))));
+            text_lines.push(Line::from(Span::styled(
+                &ev.raw_desc,
+                Style::default().fg(Color::Gray),
+            )));
         }
 
         let detail_p = Paragraph::new(text_lines)
@@ -676,24 +792,50 @@ fn draw_event_detail(frame: &mut ratatui::Frame, area: Rect, app: &CalendarApp) 
             .wrap(Wrap { trim: true });
         frame.render_widget(detail_p, area);
     } else {
-        let no_sel = Paragraph::new("Selecciona un evento de la lista para ver su información detallada.")
-            .style(Style::default().fg(Color::DarkGray))
-            .block(block);
+        let no_sel =
+            Paragraph::new("Selecciona un evento de la lista para ver su información detallada.")
+                .style(Style::default().fg(Color::DarkGray))
+                .block(block);
         frame.render_widget(no_sel, area);
     }
 }
 
 fn draw_footer(frame: &mut ratatui::Frame, area: Rect, _app: &CalendarApp) {
     let shortcuts = Line::from(vec![
-        Span::styled(" [←/→ o h/l] ", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
+        Span::styled(
+            " [←/→ o h/l] ",
+            Style::default()
+                .fg(Color::Cyan)
+                .add_modifier(Modifier::BOLD),
+        ),
         Span::raw("Día  "),
-        Span::styled(" [↑/↓ o k/j] ", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
+        Span::styled(
+            " [↑/↓ o k/j] ",
+            Style::default()
+                .fg(Color::Cyan)
+                .add_modifier(Modifier::BOLD),
+        ),
         Span::raw("Evento  "),
-        Span::styled(" [t] ", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
+        Span::styled(
+            " [t] ",
+            Style::default()
+                .fg(Color::Cyan)
+                .add_modifier(Modifier::BOLD),
+        ),
         Span::raw("Hoy  "),
-        Span::styled(" [r] ", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
+        Span::styled(
+            " [r] ",
+            Style::default()
+                .fg(Color::Cyan)
+                .add_modifier(Modifier::BOLD),
+        ),
         Span::raw("Recargar UPV  "),
-        Span::styled(" [q / Esc] ", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
+        Span::styled(
+            " [q / Esc] ",
+            Style::default()
+                .fg(Color::Yellow)
+                .add_modifier(Modifier::BOLD),
+        ),
         Span::raw("Salir"),
     ]);
 
@@ -733,7 +875,13 @@ fn format_spanish_date(date: NaiveDate) -> String {
         _ => "",
     };
 
-    format!("{}, {} de {} de {}", weekday, date.day(), month, date.year())
+    format!(
+        "{}, {} de {} de {}",
+        weekday,
+        date.day(),
+        month,
+        date.year()
+    )
 }
 
 /// Parses start and end time strings converting UTC 'Z' timestamps to Local Spanish time.
@@ -782,11 +930,23 @@ fn parse_event_times(raw_ini: &str, raw_fin: &str, all_day: bool) -> (NaiveDate,
         }
     }
 
-    (Local::now().date_naive(), raw_ini.to_string(), raw_fin.to_string())
+    (
+        Local::now().date_naive(),
+        raw_ini.to_string(),
+        raw_fin.to_string(),
+    )
 }
 
 /// Cleans UPV HTML description and extracts structured fields.
-fn parse_html_description(html: &str) -> (String, Option<String>, Option<String>, Option<String>, String) {
+fn parse_html_description(
+    html: &str,
+) -> (
+    String,
+    Option<String>,
+    Option<String>,
+    Option<String>,
+    String,
+) {
     if html.is_empty() {
         return (String::new(), None, None, None, String::new());
     }

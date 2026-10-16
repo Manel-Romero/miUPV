@@ -15,7 +15,12 @@ pub struct AuthTokens {
     pub refresh_token: String,
 
     /// Time to live for the access token in seconds.
-    #[serde(alias = "ttlAccessToken", alias = "expires_in", alias = "ttl_access_token", default)]
+    #[serde(
+        alias = "ttlAccessToken",
+        alias = "expires_in",
+        alias = "ttl_access_token",
+        default
+    )]
     pub ttl_access_token: Option<i64>,
 
     /// Time to live for the refresh token in seconds.

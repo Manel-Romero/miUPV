@@ -16,7 +16,10 @@ pub async fn run(json: bool, lang: &str) -> Result<(), Box<dyn std::error::Error
         }
         Err(err) => {
             spinner.finish_and_clear();
-            eprintln!("{}", ui::error(&format!("Error al obtener el perfil: {err}")));
+            eprintln!(
+                "{}",
+                ui::error(&format!("Error al obtener el perfil: {err}"))
+            );
             return Ok(());
         }
     };
@@ -27,11 +30,24 @@ pub async fn run(json: bool, lang: &str) -> Result<(), Box<dyn std::error::Error
     }
 
     let mut table = ui::create_table(&["Campo", "Información"]);
-    table.add_row(vec![Cell::new("Nombre completo"), Cell::new(format!("{} {}", person.nombre, person.apellidos))]);
+    table.add_row(vec![
+        Cell::new("Nombre completo"),
+        Cell::new(format!("{} {}", person.nombre, person.apellidos)),
+    ]);
     table.add_row(vec![Cell::new("NIP"), Cell::new(&person.nip)]);
     table.add_row(vec![Cell::new("DNI / NIE"), Cell::new(&person.dni)]);
-    table.add_row(vec![Cell::new("Email institucional"), Cell::new(&person.email)]);
-    table.add_row(vec![Cell::new("Colectivo / Rol"), Cell::new(if person.tipo.is_empty() { "Estudiante" } else { &person.tipo })]);
+    table.add_row(vec![
+        Cell::new("Email institucional"),
+        Cell::new(&person.email),
+    ]);
+    table.add_row(vec![
+        Cell::new("Colectivo / Rol"),
+        Cell::new(if person.tipo.is_empty() {
+            "Estudiante"
+        } else {
+            &person.tipo
+        }),
+    ]);
     if let Some(foto) = &person.foto_url {
         table.add_row(vec![Cell::new("URL Fotografía"), Cell::new(foto)]);
     }

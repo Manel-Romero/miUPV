@@ -52,7 +52,10 @@ pub async fn run(
                 }
                 Err(err) => {
                     spinner.finish_and_clear();
-                    eprintln!("{}", ui::error(&format!("Error al obtener reservas deportivas: {err}")));
+                    eprintln!(
+                        "{}",
+                        ui::error(&format!("Error al obtener reservas deportivas: {err}"))
+                    );
                     return Ok(());
                 }
             };
@@ -63,13 +66,23 @@ pub async fn run(
             }
 
             if reservas.is_empty() {
-                println!("{}", ui::info("No tienes reservas de instalaciones deportivas actualmente."));
+                println!(
+                    "{}",
+                    ui::info("No tienes reservas de instalaciones deportivas actualmente.")
+                );
                 return Ok(());
             }
 
-            println!("{}", console::style("Tus reservas deportivas:").bold().underlined());
+            println!(
+                "{}",
+                console::style("Tus reservas deportivas:")
+                    .bold()
+                    .underlined()
+            );
 
-            let mut table = ui::create_table(&["ID", "Campus", "Deporte", "Pista", "Fecha", "Horario", "Estado"]);
+            let mut table = ui::create_table(&[
+                "ID", "Campus", "Deporte", "Pista", "Fecha", "Horario", "Estado",
+            ]);
 
             for r in &reservas {
                 let horario = match (&r.hora_ini, &r.hora_fin) {
@@ -107,7 +120,10 @@ pub async fn run(
                 }
                 Err(err) => {
                     spinner.finish_and_clear();
-                    eprintln!("{}", ui::error(&format!("Error al obtener lista de deportes: {err}")));
+                    eprintln!(
+                        "{}",
+                        ui::error(&format!("Error al obtener lista de deportes: {err}"))
+                    );
                     return Ok(());
                 }
             };
@@ -118,7 +134,12 @@ pub async fn run(
             }
 
             if deportes.is_empty() {
-                println!("{}", ui::info(&format!("No se encontraron deportes para el campus {campus}.")));
+                println!(
+                    "{}",
+                    ui::info(&format!(
+                        "No se encontraron deportes para el campus {campus}."
+                    ))
+                );
                 return Ok(());
             }
 
@@ -131,27 +152,35 @@ pub async fn run(
 
             let mut table = ui::create_table(&["ID", "Deporte"]);
             for d in &deportes {
-                table.add_row(vec![
-                    Cell::new(&d.id),
-                    Cell::new(&d.nombre),
-                ]);
+                table.add_row(vec![Cell::new(&d.id), Cell::new(&d.nombre)]);
             }
 
             println!("{table}");
         }
 
-        DeportesAction::Disponibles { campus, deporte, fecha } => {
+        DeportesAction::Disponibles {
+            campus,
+            deporte,
+            fecha,
+        } => {
             let fecha_str = fecha.unwrap_or_else(|| Local::now().format("%Y-%m-%d").to_string());
             let spinner = ui::create_spinner_opt("Consultando pistas disponibles...", !json);
 
-            let disponibles = match sports_service::get_reservas_disponibles(&token, &campus, &deporte, &fecha_str, lang).await {
+            let disponibles = match sports_service::get_reservas_disponibles(
+                &token, &campus, &deporte, &fecha_str, lang,
+            )
+            .await
+            {
                 Ok(d) => {
                     spinner.finish_and_clear();
                     d
                 }
                 Err(err) => {
                     spinner.finish_and_clear();
-                    eprintln!("{}", ui::error(&format!("Error al consultar disponibilidad: {err}")));
+                    eprintln!(
+                        "{}",
+                        ui::error(&format!("Error al consultar disponibilidad: {err}"))
+                    );
                     return Ok(());
                 }
             };
@@ -168,12 +197,15 @@ pub async fn run(
 
             println!(
                 "{}",
-                console::style(format!("Disponibilidad de {deporte} ({campus}) para el {fecha_str}:"))
-                    .bold()
-                    .underlined()
+                console::style(format!(
+                    "Disponibilidad de {deporte} ({campus}) para el {fecha_str}:"
+                ))
+                .bold()
+                .underlined()
             );
 
-            let mut table = ui::create_table(&["ID Pista", "Instalación", "Fecha", "Horario", "Estado"]);
+            let mut table =
+                ui::create_table(&["ID Pista", "Instalación", "Fecha", "Horario", "Estado"]);
 
             for d in &disponibles {
                 let horario = match (&d.hora_ini, &d.hora_fin) {

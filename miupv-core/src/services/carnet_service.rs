@@ -20,7 +20,10 @@ pub async fn get_info_carnet_with_client(
     let base = client.config().www_base_url.trim_end_matches('/');
     let url = format!("{base}/pls/sorest/sic_app_vcard.datos_vcard?p_idioma={lang}");
 
-    let res = client.authed_request(Method::GET, &url, token).send().await?;
+    let res = client
+        .authed_request(Method::GET, &url, token)
+        .send()
+        .await?;
     let body = client.handle_response_text(res).await?;
 
     if let Ok(info) = parse_json_single_or_first::<CarnetInfo>(&body) {
@@ -61,7 +64,10 @@ pub async fn get_info_carnet_with_client(
             if let Some(services) = card_data.get("services").and_then(|v| v.as_array()) {
                 for s in services {
                     if s.get("id").and_then(|v| v.as_str()) == Some("qr") {
-                        qr_data = s.get("value").and_then(|v| v.as_str()).map(ToString::to_string);
+                        qr_data = s
+                            .get("value")
+                            .and_then(|v| v.as_str())
+                            .map(ToString::to_string);
                         break;
                     }
                 }
@@ -96,7 +102,10 @@ pub async fn get_cards_with_client(
     let base = client.config().www_base_url.trim_end_matches('/');
     let url = format!("{base}/pls/sorest/sic_app_vcard.get_vcards?p_idioma={lang}");
 
-    let res = client.authed_request(Method::GET, &url, token).send().await?;
+    let res = client
+        .authed_request(Method::GET, &url, token)
+        .send()
+        .await?;
     let body = client.handle_response_text(res).await?;
     parse_json_list(&body)
 }
@@ -129,12 +138,18 @@ pub async fn register_device_with_client(
         "{base}/pls/sorest/sic_app_vcard.alta_vcard?p_device={device_id}&p_so={os}&p_version_so={version}&p_modelo={model}&p_idioma={lang}"
     );
 
-    let res = client.authed_request(Method::POST, &url, token).send().await?;
+    let res = client
+        .authed_request(Method::POST, &url, token)
+        .send()
+        .await?;
     let status = res.status();
     if status.is_success() || status == reqwest::StatusCode::NO_CONTENT {
         Ok(())
     } else {
         let msg = res.text().await.unwrap_or_default();
-        Err(CoreError::Api { status, message: msg })
+        Err(CoreError::Api {
+            status,
+            message: msg,
+        })
     }
 }

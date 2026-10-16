@@ -20,7 +20,10 @@ pub async fn run(
         }
         Err(err) => {
             spinner.finish_and_clear();
-            eprintln!("{}", ui::error(&format!("Error al obtener las tareas: {err}")));
+            eprintln!(
+                "{}",
+                ui::error(&format!("Error al obtener las tareas: {err}"))
+            );
             return Ok(());
         }
     };
@@ -68,10 +71,25 @@ pub async fn run(
         return Ok(());
     }
 
-    let title_prefix = if all { "Todas las tareas" } else { "Tareas pendientes" };
-    println!("{}", console::style(format!("{title_prefix} de PoliformaT:")).bold().underlined());
+    let title_prefix = if all {
+        "Todas las tareas"
+    } else {
+        "Tareas pendientes"
+    };
+    println!(
+        "{}",
+        console::style(format!("{title_prefix} de PoliformaT:"))
+            .bold()
+            .underlined()
+    );
 
-    let mut table = ui::create_table(&["ID", "Título", "Asignatura / Sitio", "Fecha Límite", "Estado"]);
+    let mut table = ui::create_table(&[
+        "ID",
+        "Título",
+        "Asignatura / Sitio",
+        "Fecha Límite",
+        "Estado",
+    ]);
 
     for t in &filtered {
         let status_str = t.status.as_deref().unwrap_or("PENDIENTE");
@@ -80,7 +98,9 @@ pub async fn run(
         {
             Cell::new(status_str).fg(Color::Green)
         } else {
-            Cell::new(status_str).fg(Color::Yellow).add_attribute(comfy_table::Attribute::Bold)
+            Cell::new(status_str)
+                .fg(Color::Yellow)
+                .add_attribute(comfy_table::Attribute::Bold)
         };
 
         table.add_row(vec![

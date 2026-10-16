@@ -20,7 +20,10 @@ pub async fn get_equipos_with_client(
     let base = client.config().www_base_url.trim_end_matches('/');
     let url = format!("{base}/pls/sorest/sic_wakeup.equipos?p_idioma={lang}&p_modo=");
 
-    let res = client.authed_request(Method::GET, &url, token).send().await?;
+    let res = client
+        .authed_request(Method::GET, &url, token)
+        .send()
+        .await?;
     let body = client.handle_response_text(res).await?;
     parse_json_list(&body)
 }
@@ -43,9 +46,13 @@ pub async fn wakeup_equipo_with_client(
     lang: &str,
 ) -> Result<WakeupResult, CoreError> {
     let base = client.config().www_base_url.trim_end_matches('/');
-    let url = format!("{base}/pls/sorest/sic_wakeup.wakeup?p_equipo={equipo_id}&p_idioma={lang}&p_modo=");
+    let url =
+        format!("{base}/pls/sorest/sic_wakeup.wakeup?p_equipo={equipo_id}&p_idioma={lang}&p_modo=");
 
-    let res = client.authed_request(Method::GET, &url, token).send().await?;
+    let res = client
+        .authed_request(Method::GET, &url, token)
+        .send()
+        .await?;
     let body = client.handle_response_text(res).await?;
     parse_json_single_or_first(&body)
 }

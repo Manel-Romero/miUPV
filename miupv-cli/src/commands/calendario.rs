@@ -44,7 +44,8 @@ pub async fn run(
         let events = match calendar_service::load_cached_calendar() {
             Some(cache) => cache.events,
             None => {
-                let ev = calendar_service::get_ical_events(&token, &fecha_ini, &fecha_fin, lang).await?;
+                let ev =
+                    calendar_service::get_ical_events(&token, &fecha_ini, &fecha_fin, lang).await?;
                 let _ = calendar_service::save_cached_calendar(&ev);
                 ev
             }
@@ -61,22 +62,29 @@ pub async fn run(
         }
         Some(CalendarioAction::Export { out, ini, fin }) => {
             let now = Local::now().date_naive();
-            let fecha_ini = ini.unwrap_or_else(|| (now - Duration::days(30)).format("%Y-%m-%d").to_string());
-            let fecha_fin = fin.unwrap_or_else(|| (now + Duration::days(120)).format("%Y-%m-%d").to_string());
+            let fecha_ini =
+                ini.unwrap_or_else(|| (now - Duration::days(30)).format("%Y-%m-%d").to_string());
+            let fecha_fin =
+                fin.unwrap_or_else(|| (now + Duration::days(120)).format("%Y-%m-%d").to_string());
 
             let spinner = ui::create_spinner("Descargando eventos del calendario...");
-            let events = match calendar_service::get_ical_events(&token, &fecha_ini, &fecha_fin, lang).await {
-                Ok(ev) => {
-                    spinner.finish_and_clear();
-                    let _ = calendar_service::save_cached_calendar(&ev);
-                    ev
-                }
-                Err(err) => {
-                    spinner.finish_and_clear();
-                    eprintln!("{}", ui::error(&format!("Error al obtener eventos del calendario: {err}")));
-                    return Ok(());
-                }
-            };
+            let events =
+                match calendar_service::get_ical_events(&token, &fecha_ini, &fecha_fin, lang).await
+                {
+                    Ok(ev) => {
+                        spinner.finish_and_clear();
+                        let _ = calendar_service::save_cached_calendar(&ev);
+                        ev
+                    }
+                    Err(err) => {
+                        spinner.finish_and_clear();
+                        eprintln!(
+                            "{}",
+                            ui::error(&format!("Error al obtener eventos del calendario: {err}"))
+                        );
+                        return Ok(());
+                    }
+                };
 
             let count = events.len();
             calendar_service::export_to_ics(&events, &out)?;
