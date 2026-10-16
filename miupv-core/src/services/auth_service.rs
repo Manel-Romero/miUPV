@@ -881,22 +881,30 @@ mod tests {
 
     #[test]
     fn test_sanitize_oauth_username() {
-        assert_eq!(sanitize_oauth_username("12345678Z"), "12345678");
-        assert_eq!(sanitize_oauth_username("12345678z"), "12345678");
-        assert_eq!(sanitize_oauth_username("12345678"), "12345678");
-        assert_eq!(sanitize_oauth_username("  87654321A  "), "87654321");
-        assert_eq!(sanitize_oauth_username("usuario_test"), "usuario_test");
+        let dni_digits = "12345678";
+        let dni_upper = format!("{dni_digits}Z");
+        let dni_lower = format!("{dni_digits}z");
+        let dni_padded = format!("  {dni_digits}A  ");
+        let regular_username = "usuario_test";
+
+        assert_eq!(sanitize_oauth_username(&dni_upper), dni_digits);
+        assert_eq!(sanitize_oauth_username(&dni_lower), dni_digits);
+        assert_eq!(sanitize_oauth_username(dni_digits), dni_digits);
+        assert_eq!(sanitize_oauth_username(&dni_padded), dni_digits);
+        assert_eq!(sanitize_oauth_username(regular_username), regular_username);
     }
 
     #[test]
     fn test_credentials_save_load() {
+        let test_user = "user_test";
+        let test_pass = "pass_secret_123";
         let temp_file = "/tmp/miupv_test_creds.json";
         std::env::set_var("MIUPV_CREDENTIALS_FILE", temp_file);
 
-        save_credentials("user_test", "pass_secret_123").expect("Should save credentials");
+        save_credentials(test_user, test_pass).expect("Should save credentials");
         let (u, p) = load_credentials().expect("Should load credentials");
-        assert_eq!(u, "user_test");
-        assert_eq!(p, "pass_secret_123");
+        assert_eq!(u, test_user);
+        assert_eq!(p, test_pass);
 
         clear_credentials().expect("Should clear credentials");
         assert!(!std::path::Path::new(temp_file).exists());

@@ -84,7 +84,7 @@ pub async fn get_person_data_with_client(
     ))
 }
 
-/// Parses the student's name from the Intranet UPV menu HTML (e.g. "[ García López, Juan ]").
+/// Parses the student's name from the Intranet UPV menu HTML (e.g. "[ Apellidos, Nombre ]").
 pub fn extract_name_from_intranet_menu(html: &str) -> Option<(String, String)> {
     let clean = html.replace("&nbsp;", " ");
 
@@ -115,14 +115,18 @@ mod tests {
 
     #[test]
     fn test_extract_name_from_intranet_html() {
-        let sample = r#"
-            <li class="menuAD">[&nbsp; García López, Juan &nbsp;]
+        let expected_nombre = "EstudianteNombre";
+        let expected_apellidos = "ApellidoPrimero ApellidoSegundo";
+        let sample = format!(
+            r#"
+            <li class="menuAD">[&nbsp; {expected_apellidos}, {expected_nombre} &nbsp;]
             <a class="menuAD2N2" href="/expira" title="Cerrar sesión">Cerrar sesión</a>
-        "#;
+        "#
+        );
         let (nombre, apellidos) =
-            extract_name_from_intranet_menu(sample).expect("Should parse student name");
-        assert_eq!(nombre, "Juan");
-        assert_eq!(apellidos, "García López");
+            extract_name_from_intranet_menu(&sample).expect("Should parse student name");
+        assert_eq!(nombre, expected_nombre);
+        assert_eq!(apellidos, expected_apellidos);
     }
 }
 

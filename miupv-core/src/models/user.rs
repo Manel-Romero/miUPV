@@ -33,7 +33,7 @@ pub struct PersonData {
     #[serde(alias = "TIPO", alias = "tipo", alias = "tipo_usuario", alias = "tipoEmp", default)]
     pub tipo: String,
 
-    /// Full name fallback from API ("name": "ROMERO ALVAREZ, MANUEL").
+    /// Full name fallback from API (e.g. "name": "APELLIDOS, NOMBRE").
     #[serde(alias = "name", alias = "NAME", default)]
     pub full_name: Option<String>,
 }
